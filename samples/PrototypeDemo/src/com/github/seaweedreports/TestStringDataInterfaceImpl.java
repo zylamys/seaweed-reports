@@ -16,7 +16,7 @@ public class TestStringDataInterfaceImpl implements IStringDataInterface {
         if (fieldNames == null) {
             return null;
         }
-        for (int i = 1; i < (tableName.equals("employer") ? 3 : 0); i++) {
+        for (int i = 1; i < (tableName.equals("staff") ? 3 : 2); i++) {
             LinkedList<String> list = new LinkedList<String>();
             for (String s : fieldNames) {
                 list.add("***" + tableName + "." + s + " (" + parentTableName + "=" + filter + ")" + ic + "***");
