@@ -483,6 +483,19 @@ public class TestMappedXmlReport {
         }
 
     }
+    
+    /**
+     * Remove element or attribute
+     */
+    private Node removeNode(Node node) {
+        Node parentNode = getParentNode(node);
+        if (node instanceof Attr) {
+            Element el = (Element)parentNode;
+            return el.removeAttributeNode((Attr) node);
+        } else {
+            return parentNode.removeChild(node);
+        }
+    }
 
     private String getNodeFromMap(Node fromNode, LinkedHashMap<String, String> map) {
         if (fromNode == null || map == null) {
@@ -538,9 +551,14 @@ public class TestMappedXmlReport {
 
                         if (values != null) {
                             if (!values.isEmpty()) {
-
-                                toNode.setTextContent(values.pop());
-                                System.out.print(toNode.getNodeName() + "=" + toNode.getTextContent());
+                                String value = values.pop();
+                                if(value != null) {
+                                    toNode.setTextContent(value);    
+                                } else {
+                                    removeNode(toNode);
+                                    dataRowCount -= 1;
+                                }
+                                System.out.print(toNode.getNodeName() + "=" + value);
                             } else {
                                 System.out.println("ERROR: List of fields is empty for: " + toNode.getNodeName() + "(" + tableName + ")");
                             }
@@ -585,9 +603,19 @@ public class TestMappedXmlReport {
                     newNodes = newNode.getChildNodes();
                     newAttr = newNode.getAttributes();
                     iCountChildren = countChildNodes(newNodes, newAttr); //TODO remove as it is the same
+                    int offset = 0;
                     for (int i = 0; i < iCountChildren; i++) {
-                        Node currNode = getNodeByIndex(newNodes, newAttr, i);
-                        fillTemplate(dataIntf, res, template, currNode, currNode, map, tableName, rowCopy, false, parentTableName, rowNo.toString());
+                        Node currNode = null;
+                        if (offset == 0) {
+                            currNode = getNodeByIndex(newNodes, newAttr, i);
+                        } else if (offset > 0) {
+                            currNode = getNodeByIndex(newNodes, newAttr, i, offset - 1);
+                        } else {
+                            iCountChildren += offset;
+                            i += offset;
+                            currNode = getNodeByIndex(newNodes, newAttr, i);
+                        }
+                        offset = fillTemplate(dataIntf, res, template, currNode, currNode, map, tableName, rowCopy, false, parentTableName, rowNo.toString());
                     }
                 }
                 if (getParentNode(fromNode).getNodeType() != DOCUMENT_NODE) {
@@ -599,14 +627,15 @@ public class TestMappedXmlReport {
                 newAttr = toNode.getAttributes();
                 int offset = 0;
                 for (int i = 0; i < iCountChildren; i++) { //Table root has one child only - ROW ROOT
-                    if (i != 0) { //
-                        System.out.println("ERROR! isTableRoot() returned wrong value");
-                    }
                     Node currChild = null;
                     if (offset == 0) {
                         currChild = getNodeByIndex(newNodes, newAttr, i);
-                    } else {
+                    } else if (offset > 0) {
                         currChild = getNodeByIndex(newNodes, newAttr, i, offset - 1);
+                    } else {
+                        iCountChildren += offset;
+                        i += offset;
+                        currChild = getNodeByIndex(newNodes, newAttr, i);
                     }
                     boolean childIsTableRow = isTableNodeCached(currChild);
                     String nodesTableName = !childIsTableRow ? tableName : mapXmlElementToTable(currChild.getNodeName());//ignore row tag name

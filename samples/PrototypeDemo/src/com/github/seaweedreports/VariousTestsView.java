@@ -228,8 +228,8 @@ public class VariousTestsView extends FrameView {
     public void doFillXml()
     {
         TestMappedXmlReport  gen= new TestMappedXmlReport();
-        
-        Document xml = gen.run();
+        Document xml = TestMappedXmlReport.loadXMLFrom(TestMappedXmlReport.xmlDummy);
+        xml = gen.run(xml);
         System.out.println(TestMappedXmlReport.docToString(xml));
 
         

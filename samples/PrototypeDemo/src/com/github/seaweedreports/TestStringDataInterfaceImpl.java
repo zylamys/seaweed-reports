@@ -19,7 +19,12 @@ public class TestStringDataInterfaceImpl implements IStringDataInterface {
         for (int i = 1; i < (tableName.equals("staff") ? 3 : 2); i++) {
             LinkedList<String> list = new LinkedList<String>();
             for (String s : fieldNames) {
-                list.add("***" + tableName + "." + s + " (" + parentTableName + "=" + filter + ")" + ic + "***");
+//                list.add("***" + tableName + "." + s + " (" + parentTableName + "=" + filter + ")" + ic + "***");
+                if(ic!=4) {
+                    list.add("***" + tableName + "." + s + " (" + parentTableName + "=" + filter + ")" + ic + "***");
+                } else {
+                    list.add(null);
+                }
                 ic++;
             }
             // Just put the list of string values to create record
